@@ -1,0 +1,42 @@
+#!/bin/bash
+#PBS -d .
+#PBS -l nodes=1:ppn=24
+#PBS -N Elast_Ni2MnGa
+#PBS -j oe
+#PBS -l walltime=2000:00:00
+
+currDir=`pwd`
+
+LD_LIBRARY_PATH=/share/intel/mkl/lib/intel64/:$LD_LIBRARY_PATH
+. /share/intel/compilers_and_libraries/linux/mpi/intel64/bin/mpivars.sh
+export I_MPI_FALLBACK_DEVICE=disable
+export I_MPI_FABRICS=shm
+export I_MPI_PIN=disable
+export LD_LIBRARY_PATH
+
+#python create_task.py
+
+cd bulk/
+
+for f in `ls`; do 
+    if test -d "./$f"
+    then
+
+        cd $f
+
+        for d in `ls`; do 
+            if test -d "./$d"
+            then
+
+                echo $f, $d
+                cd "./$d"
+                mpirun  /share/vasp/vasp.6.1.1/vasp_std > vasp.out 2>&1
+
+            fi
+        cd ..
+        done
+
+        cd ..
+
+    fi
+done
