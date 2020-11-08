@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -d .
 #PBS -l nodes=1:ppn=24
-#PBS -N Elast_Ni2MnGa
+#PBS -N Elast
 #PBS -j oe
 #PBS -l walltime=2000:00:00
 
