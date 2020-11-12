@@ -6,9 +6,12 @@ import subprocess
 import os
 import shutil
 
+######### Ввести директорию с рассчетом a0 #########
+path0 = raw_input('Enter the path to the calculation of equilibrium lattice parameter:\n')
+
 ######### Считывание CONTCAR #########
 
-f = open('ION/CONTCAR',"r")
+f = open(path0 + '/CONTCAR',"r")
 contcar = f.readlines()
 f.close()
 
@@ -56,7 +59,7 @@ else:
 
 ######### Считывание OUTCAR #########
 
-f = open('ION/OUTCAR',"r")
+f = open(path0 + '/OUTCAR',"r")
 outcar = f.readlines()
 f.close()
 
@@ -75,7 +78,7 @@ for i in range(basis.shape[0], 0, -1):
 
 ######### Изменение некоторых тегов в INCAR #########
 
-f = open('ION/INCAR',"r")
+f = open(path0 + '/INCAR',"r")
 incar = f.readlines()
 f.close()
 
@@ -164,9 +167,9 @@ for n in range(n_max):
             f.write(incar[i])
         f.close
 
-        shutil.copyfile('ION/POTCAR', 'bulk/D{}/{}/POTCAR'.format(n, delta)) # Запись POTCAR
+        shutil.copyfile(path0 + '/POTCAR', 'bulk/D{}/{}/POTCAR'.format(n, delta)) # Запись POTCAR
 
-        shutil.copyfile('ION/KPOINTS', 'bulk/D{}/{}/KPOINTS'.format(n, delta)) # Запись KPOINTS
+        shutil.copyfile(path0 + '/KPOINTS', 'bulk/D{}/{}/KPOINTS'.format(n, delta)) # Запись KPOINTS
 
     if n == 0:
         DELTAS = np.delete(DELTAS, 3)
