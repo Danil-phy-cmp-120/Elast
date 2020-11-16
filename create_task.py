@@ -67,8 +67,8 @@ for line in outcar[len(outcar)-200:len(outcar)]:
     inp = line.split()
     if len(inp) > 3 and inp[0] == 'external' and inp[1] == 'pressure':
         print 'external pressure =',  inp[3]
-        if float(inp[3]) > 0.1:
-            print("\033[31m{}".format('The pressure is high, restart the ionic relaxation with a small EDIFG'))
+        if abs(float(inp[3])) > 5:
+            print('The pressure is high, restart the ionic relaxation with a small EDIFG')
 
 magmom = np.zeros(basis.shape[0])
 n = 0
