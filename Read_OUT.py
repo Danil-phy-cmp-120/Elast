@@ -115,8 +115,8 @@ if len(path) == 3:
  
     mu = (3*BH-2*GH)/(6*BH+2*GH)
     E = (9*BH*GH)/(3*BH+GH)
-    func = (3*(2*(2*(1+mu)/(3-6*mu))**1.5 + ((1+mu)/(3-3*mu))**1.5)**-1)**0.333
-    Tetta = constants.hbar * ( 6*3.1415**2 * V0**0.5 * get_weight()[1] )**0.333 * func * ((BH * 10**9 * constants.N_A) / ( constants.k**2 * get_weight()[0] ))**0.5
+    func = (3*(2*(2*(1+mu)/(3-6*mu))**1.5 + ((1+mu)/(3-3*mu))**1.5)**-1)**(1.0/3.0)
+    Tetta = constants.hbar * ( 6*3.1415**2 * V0**0.5 * get_weight()[1] )**(1.0/3.0) * func * ((BH * 10**9 * constants.N_A) / ( constants.k**2 * get_weight()[0] ))**0.5
 
     f.write('mu = ' + str(mu) + '\n')
     f.write('E = ' + str(E)  + '\n')
@@ -192,8 +192,8 @@ if len(path) == 6:
 
     mu = (3*BH-2*GH)/(6*BH+2*GH)
     E = (9*BH*GH)/(3*BH+GH)
-    func = (3*(2*(2*(1+mu)/(3-6*mu))**1.5 + ((1+mu)/(3-3*mu))**1.5)**-1)**0.333
-    Tetta = constants.hbar * ( 6*3.1415**2 * V0**0.5 * get_weight()[1] )**0.333 * func * ((BH * 10**9 * constants.N_A) / ( constants.k**2 * get_weight()[0] ))**0.5
+    func = (3*(2*(2*(1+mu)/(3-6*mu))**1.5 + ((1+mu)/(3-3*mu))**1.5)**-1)**(1.0/3.0)
+    Tetta = constants.hbar * ( 6*3.1415**2 * V0**0.5 * get_weight()[1] )**(1.0/3.0) * func * ((BH * 10**9 * constants.N_A) / ( constants.k**2 * get_weight()[0] ))**0.5
 
     f.write('mu = ' + str(mu) + '\n')
     f.write('E = ' + str(E)  + '\n')
