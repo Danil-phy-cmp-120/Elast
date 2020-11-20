@@ -63,18 +63,23 @@ f = open(path0 + '/OUTCAR',"r")
 outcar = f.readlines()
 f.close()
 
-for line in outcar[len(outcar)-200:len(outcar)]:
-    inp = line.split()
-    if len(inp) > 3 and inp[0] == 'external' and inp[1] == 'pressure':
-        print 'external pressure =',  inp[3]
-        if abs(float(inp[3])) > 5:
-            print('The pressure is high, restart the ionic relaxation with a small EDIFG')
-
+flag = False
 magmom = np.zeros(basis.shape[0])
 n = 0
-for i in range(basis.shape[0], 0, -1):
-   magmom[n] = float(outcar[len(outcar)-(30+i)].split()[4])
-   n = n + 1
+for line in outcar[len(outcar)-200:len(outcar)]:
+    inp = line.split()
+
+    if len(inp) > 3 and inp[0] == 'external' and inp[1] == 'pressure':
+        print 'external pressure =',  inp[3]
+        if abs(float(inp[3])) > 5.0:
+            print('The pressure is high, restart the ionic relaxation with a small EDIFG')
+
+    if len(inp) > 3 and flag == True and inp[0].isdigit() == True and n < basis.shape[0]:
+        magmom[n] = float(inp[len(inp)-1])
+        n = n + 1
+    if len(inp) > 1 and inp[0] == 'magnetization':
+        flag = True
+
 
 ######### Изменение некоторых тегов в INCAR #########
 
