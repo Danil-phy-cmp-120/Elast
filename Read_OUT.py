@@ -33,7 +33,7 @@ def get_energy(p):
     outcar = f.readlines()
     f.close()
 
-    for line in outcar[len(outcar)-200:len(outcar)]:
+    for line in outcar:#[len(outcar)-len(outcar)*0.1:len(outcar)]:
         inp = line.split()
         if len(inp) > 4 and inp[4] == 'energy(sigma->0)':
             energy = float(inp[6])
@@ -45,7 +45,7 @@ def get_volume(p):
     outcar = f.readlines()
     f.close()
 
-    for line in outcar[len(outcar)-200:len(outcar)]:
+    for line in outcar:#[len(outcar)-len(outcar)*0.1:len(outcar)]:
         inp = line.split()
         if len(inp) > 3 and inp[0] == 'volume' and inp[1] == 'of' and inp[2] == 'cell':
             volume = float(inp[4])
@@ -201,6 +201,92 @@ if len(path) == 6:
     f.write('\n')
 
     if (C11 > 0 and C33 > 0 and C44 > 0 and C66 > 0 and C11 - C12 > 0 and C11 - 2*C13 + C33 > 0 and 2*C11 + 2*C12 + 4*C13 + C33 > 0):
+        f.write('The crystal lattice is stable under distortion')
+    else:
+        f.write('The crystal lattice is unstable under distortion')
+
+    f.close()
+
+
+
+# Рассчет отдельных модулей упругости для гексогоальной симметрии # 
+# И.Р. Шеин, В.С. Кийко, Ю.Н. Макурин, М.А. Горбунова, А.Л. Ивановский. Физика твердого тела, 2007, том 49, вып. 6 #
+if len(path) == 5:
+    energy = np.zeros((DELTAS.size, 5))
+    alfa = np.zeros(5)
+
+    for n in range(5):
+       for i in range(DELTAS.size):
+          if n == 0 and DELTAS[i] == 0.0:
+              energy[i, :] = [get_energy('bulk/D{}/{}/OUTCAR'.format(n, DELTAS[i]))]*5
+          elif DELTAS[i] != 0.0:
+              energy[i, n] = get_energy('bulk/D{}/{}/OUTCAR'.format(n, DELTAS[i]))
+ 
+    energy = 1.6*10**-28 * (energy - energy[3,0])/V0
+    #np.savetxt('energy.dat', energy, fmt='%.6f')
+
+    for n in range(5):
+        alfa[n] = np.polyfit(DELTAS, energy[:,n], 2)[0]
+
+    f = open('out.dat', "wb")
+    np.savetxt(f, np.column_stack((DELTAS, energy)), fmt='%.5f')
+    f.write('\n')
+
+    np.savetxt(f, alfa, fmt='%.5f')
+    f.write('\n')
+
+    C11 = (alfa[0] + alfa[1])/2.0
+    C12 = (alfa[0] - alfa[1])/2.0
+    C33 = 2*alfa[2]
+    C55 = alfa[3]/2.0
+    C13 = (alfa[4] - C11 - C12 - C33/2.0)/2.0
+    C66 = alfa[1]/2.0
+    C = C33*(C11+C12)-2*C13**2
+
+    B= 2.0*alfa[4]/9.0
+
+    f.write('B = '+ str(B) + '       ')
+    f.write('\n')
+    f.write('Cij' + '\n')
+    f.write('C11 = ' + str(C11) + '\n')
+    f.write('C12 = ' + str(C12) + '\n')
+    f.write('C13 = ' + str(C13) + '\n')
+    f.write('C33 = ' + str(C33) + '\n')
+    f.write('C55 = ' + str(C55) + '\n')
+    f.write('\n')
+
+    BV=(2.0/9.0)*(C11 + C12 + 2*C13 + 0.5*C33)
+    BR=(C33*(C11+C12)-2*C12**2)/(C11+C12+2*C33-4*C13)
+    GV=(12*C55+12*C66+C11+C12+2*C33-4*C13)/30
+    GR=(5*C55*C66*(C33*(C11+C12)-2*C12**2))/(2*(C55+C66)*(C33*(C11+C12)-2*C12**2)+3*BV*C55*C66)
+    BH=(BV+BR)/2
+    GH=(GV+GR)/2
+
+    f.write('BV = ' + str(BV) + '       ')
+    f.write('GV = ' + str(GV) + '\n')
+    f.write('BR = ' + str(BR) + '       ')
+    f.write('GR = ' + str(GR) + '\n')
+    f.write('BH = ' + str(BH) + '       ')
+    f.write('GH = ' + str(GH) + '\n')
+    f.write('\n')
+
+    s11 = C33/C + 1.0/(C11-C12)
+    s12 = -1.0/(C11-C12)
+    s13 = -C13/C
+    s33 = (C11+C12)/C
+    s55 = 1.0/C55
+
+    mu = np.array([-s12/s11, -s13/s11])
+    E = np.array([1.0/s11, 1.0/s33])
+    func = (3*(2*(2*(1+mu)/(3-6*mu))**1.5 + ((1+mu)/(3-3*mu))**1.5)**-1)**(1.0/3.0)
+    Tetta = constants.hbar * ( 6*3.1415**2 * V0**0.5 * get_weight()[1] )**(1.0/3.0) * func * ((BH * 10**9 * constants.N_A) / ( constants.k**2 * get_weight()[0] ))**0.5
+
+    f.write('mu = ' + str(mu) + '\n')
+    f.write('E = ' + str(E)  + '\n')
+    f.write('Tetta = ' + str(Tetta) + '\n')
+    f.write('\n')
+
+    if (C11 > 0 and C33 > 0 and C55 > 0 and C66 > 0 and C11**2 > C12**2 and (C11+C12)*C33 > 2*C13**2 and C11*C33 > C13**2):
         f.write('The crystal lattice is stable under distortion')
     else:
         f.write('The crystal lattice is unstable under distortion')

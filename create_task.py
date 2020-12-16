@@ -37,25 +37,34 @@ for line in contcar[8:8+num_atoms]:
         basis += [float(i)]
 basis = np.array(basis)
 basis.shape = ((len(basis)/3, 3))
-#print basis
 
 
-# Рассчет длины векторов трансляций #
+# Рассчет длины векторов трансляций и углов между ними #
 len_pv = np.zeros(3)
+ang_pv = np.zeros(3)
 for i in range(3):
-        len_pv[i] = (sum(primitive_vectors[i,:]**2))**0.5
+        len_pv[i] = float("{:.3f}".format((sum(primitive_vectors[i,:]**2))**0.5))
+
+ang_pv[0] = float("{:.3f}".format(sum(primitive_vectors[0,:] * primitive_vectors[1,:]) / (abs(len_pv[0])*abs(len_pv[1]))))
+ang_pv[1] = float("{:.3f}".format(sum(primitive_vectors[1,:] * primitive_vectors[2,:]) / (abs(len_pv[1])*abs(len_pv[2]))))
+ang_pv[2] = float("{:.3f}".format(sum(primitive_vectors[0,:] * primitive_vectors[2,:]) / (abs(len_pv[0])*abs(len_pv[2]))))
+ang_pv = (np.arccos(ang_pv)*180.0)/np.pi
 
 
 # Определение сингонии #
-if ("{:.3f}".format(len_pv[0]) == "{:.3f}".format(len_pv[1]) and "{:.3f}".format(len_pv[1]) == "{:.3f}".format(len_pv[2])) or (float("{:.3f}".format(len_pv[0])) % float("{:.3f}".format(len_pv[1])) == 0 and float("{:.3f}".format(len_pv[0])) % float("{:.3f}".format(len_pv[2])) == 0):
+if (len_pv[0] == len_pv[1] and len_pv[1] == len_pv[2]) or (len_pv[0] % len_pv[1] == 0 and len_pv[0] % len_pv[2] == 0):
     crystal_system = 'cube' 
     n_max = 3
-elif ("{:.3f}".format(len_pv[0]) == "{:.3f}".format(len_pv[1]) and "{:.3f}".format(len_pv[1]) != "{:.3f}".format(len_pv[2])) or ("{:.3f}".format(len_pv[1]) == "{:.3f}".format(len_pv[2]) and "{:.3f}".format(len_pv[0]) != "{:.3f}".format(len_pv[1])) or ("{:.3f}".format(len_pv[2]) == "{:.3f}".format(len_pv[0]) and "{:.3f}".format(len_pv[2]) != "{:.3f}".format(len_pv[1])):
+elif ((len_pv[0] == len_pv[1] and len_pv[1] != len_pv[2]) or (len_pv[1] == len_pv[2] and len_pv[0] != len_pv[1]) or (len_pv[2] == len_pv[0] and len_pv[2] != len_pv[1]))  and (int(ang_pv[0]) != 120 and int(ang_pv[1]) != 120 and int(ang_pv[2]) != 120):
     crystal_system = 'tetr'
     n_max = 6
+elif ((len_pv[0] == len_pv[1] and len_pv[1] != len_pv[2]) or (len_pv[1] == len_pv[2] and len_pv[0] != len_pv[1]) or (len_pv[2] == len_pv[0] and len_pv[2] != len_pv[1])) and (int(ang_pv[0]) == 120 or int(ang_pv[1]) == 120 or int(ang_pv[2]) == 120):
+    crystal_system = 'hex'
+    n_max = 5
 else:
     print 'Calculation is possible only for cubic and tetragonal crystal system'
 
+print "Crystal system: {}".format(crystal_system)
 
 ######### Считывание OUTCAR #########
 
@@ -149,6 +158,27 @@ for n in range(n_max):
 
                          [1, 0, 0],              
                          [0, 1, 0],
+                         [0, 0, 1 + delta]])
+
+        elif crystal_system == 'hex':
+            T = np.array([[1 + delta, 0, 0],
+                         [0, 1 + delta, 0],
+                         [0, 0, 1],
+   
+                         [1 + delta, 0, 0],                  
+                         [0, 1 - delta, 0],
+                         [0, 0, 1],
+             
+                         [1, 0, 0],              
+                         [0, 1, 0],
+                         [0, 0, 1+delta],
+
+                         [1, 0, delta],              
+                         [0, 1, 0],
+                         [delta, 0, 1],
+
+                         [1 + delta, 0, 0],
+                         [0, 1 + delta, 0],
                          [0, 0, 1 + delta]])
 
         D =  T[n*3:n*3+3,:]
