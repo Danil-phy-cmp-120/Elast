@@ -1,9 +1,27 @@
-# Elast
-Code for calculating elastic modulus with VASP
+# VASP Elastic Tensor Workflow
 
-1) Создайте папку "ION". Проведите ионную релаксацию в этой папке используя VASP и сведите внешнее давление к нулю (приемлимое значение порядка 1 кбар). Поместите файлы проекта рядом с папкой "ION". 
-2) Запустите программу create_task.py. Данная программа создаст файлы задачи для кода VASP с искаженным базисами в POSCAR.
-3) Запстите скрипт vasp_qsub_elast командой "qsub -q node vasp_qsub_elast". Данный скрипт поочередно запустист рассчеты VASP во всех вложенных папках в директории "bulk".
-4) После завершения рассчетов запустите программу Read_out.py. Эта программа считает значения полной энергии из файлов OUTCAR и вычислит отдельные коэффициенты тензора упругих постоянных.
+## 📌 Description
 
+This repository provides scripts for performing **elastic tensor calculations using VASP**. It includes:
 
+- Generation of strained structures for elastic property evaluation
+- A VASP job submission script
+- A parser for extracting elastic constants from output files
+
+The scripts are simple and modular, intended for academic use in materials science projects focused on mechanical properties.
+
+## 📂 Files
+
+- `create_task.py` – Generate input files for different strain configurations
+- `vasp_qsub_elast` – Submission script for running VASP jobs on a computing cluster
+- `Read_OUT.py` – Parse VASP output files to extract the elastic tensor
+
+## 🚀 Usage
+
+1. Run `create_task.py` to generate strain-deformed structures.
+2. Submit jobs using `vasp_qsub_elast`.
+3. After VASP calculations, run `Read_OUT.py` to extract the elastic constants.
+
+## 📄 License
+
+For academic research use. Provided without warranty.
